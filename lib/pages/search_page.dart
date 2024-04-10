@@ -1,5 +1,5 @@
 import 'package:fyp_app/helper/helper_function.dart';
-import 'package:fyp_app/pages/chat_page.dart';
+import 'package:fyp_app/pages/test_page.dart';
 import 'package:fyp_app/service/database_service.dart';
 import 'package:fyp_app/widgets/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -70,7 +70,7 @@ class _SearchPageState extends State<SearchPage> {
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                         border: InputBorder.none,
-                        hintText: "Search groups....",
+                        hintText: "Search",
                         hintStyle:
                             TextStyle(color: Colors.white, fontSize: 16)),
                   ),

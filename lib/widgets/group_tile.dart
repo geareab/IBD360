@@ -1,4 +1,4 @@
-import 'package:fyp_app/pages/chat_page.dart';
+import 'package:fyp_app/pages/test_page.dart';
 import 'package:fyp_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
