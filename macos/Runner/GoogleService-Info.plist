@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.geareab.fypApp</string>
+	<string>com.example.fypApp</string>
 	<key>PROJECT_ID</key>
 	<string>fyp1-af990</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:377531536938:ios:36f81cf5bd240ae7c91553</string>
+	<string>1:377531536938:ios:d2c1fc49c19ba3cfc91553</string>
 </dict>
 </plist>
