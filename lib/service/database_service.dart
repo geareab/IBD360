@@ -9,6 +9,8 @@ class DatabaseService {
       FirebaseFirestore.instance.collection("users");
   final CollectionReference groupCollection =
       FirebaseFirestore.instance.collection("groups");
+  final CollectionReference doctorCollection =
+      FirebaseFirestore.instance.collection('Doctors');
 
   // saving the userdata
   Future savingUserData(String fullName, String email) async {
@@ -57,6 +59,32 @@ class DatabaseService {
     });
   }
 
+  Future createDocGroup(String userName, String id, String groupName,
+      String doctorUid, String doctorName) async {
+    print(groupName);
+    DocumentReference groupDocumentReference = await groupCollection.add({
+      "groupName": groupName,
+      "groupIcon": "",
+      "admin": "${doctorUid}_$doctorName",
+      "members": [],
+      "groupId": "",
+      "recentMessage": "",
+      "recentMessageSender": "",
+    });
+    // update the members
+    await groupDocumentReference.update({
+      "members": FieldValue.arrayUnion(
+          ["${uid}_$userName", "${doctorUid}_$doctorName"]),
+      "groupId": groupDocumentReference.id,
+    });
+
+    DocumentReference userDocumentReference = userCollection.doc(uid);
+    return await userDocumentReference.update({
+      "groups":
+          FieldValue.arrayUnion(["${groupDocumentReference.id}_$groupName"])
+    });
+  }
+
   // getting the chats
   getChats(String groupId) async {
     return groupCollection
@@ -93,6 +121,41 @@ class DatabaseService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  Future<List<String>> getDoctorsNames() async {
+    List<String> doctorNames = [];
+    try {
+      QuerySnapshot snapshot = await doctorCollection.get();
+      snapshot.docs.forEach((doc) {
+        doctorNames.add(doc['Name']);
+      });
+    } catch (e) {
+      print(e.toString());
+    }
+    return doctorNames;
+  }
+
+  Future updateUserData(String fullName, String email, String? doctor) async {
+    return await userCollection.doc(uid).update({
+      'doctor': doctor,
+    });
+  }
+
+  Future<String?> getUidByName(String name) async {
+    try {
+      QuerySnapshot snapshot = await doctorCollection
+          .where('Name', isEqualTo: name)
+          .get(); // Querying the doctorCollection
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first.id; // Assuming the UID is the document ID
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
     }
   }
 

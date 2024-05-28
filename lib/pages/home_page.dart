@@ -1,13 +1,14 @@
 import 'package:fyp_app/helper/helper_function.dart';
 import 'package:fyp_app/pages/auth/login_page.dart';
 import 'package:fyp_app/pages/profile_page.dart';
-import 'package:fyp_app/pages/search_page.dart';
+import 'package:fyp_app/pages/symptoms_update.dart';
 import 'package:fyp_app/service/auth_service.dart';
 import 'package:fyp_app/service/database_service.dart';
 import 'package:fyp_app/widgets/group_tile.dart';
 import 'package:fyp_app/widgets/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fyp_app/shared/constants.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -67,15 +68,20 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
               onPressed: () {
-                nextScreen(context, const SearchPage());
+                nextScreen(
+                    context,
+                    ProfilePage(
+                      userName: userName,
+                      email: email,
+                    ));
               },
               icon: const Icon(
-                Icons.search,
+                Icons.group,
               ))
         ],
         elevation: 0,
         centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Constants.primaryColorr,
         title: const Text(
           "Home",
           style: TextStyle(
@@ -111,9 +117,26 @@ class _HomePageState extends State<HomePage> {
             selected: true,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            leading: const Icon(Icons.group),
+            leading: const Icon(Icons.home),
             title: const Text(
               "Home",
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          ListTile(
+            onTap: () {
+              nextScreenReplace(
+                  context,
+                  SymptomsPage(
+                    userName: userName,
+                    email: email,
+                  ));
+            },
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            leading: const Icon(Icons.medical_information),
+            title: const Text(
+              "Symptoms",
               style: TextStyle(color: Colors.black),
             ),
           ),
@@ -180,15 +203,37 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       )),
-      body: groupList(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Greetings, $userName', // Greeting message
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: groupList(), // Load group list below the greeting
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          popUpDialog(context);
+          nextScreenReplace(
+              context,
+              SymptomsPage(
+                userName: userName,
+                email: email,
+              ));
         },
         elevation: 0,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Constants.primaryColorr,
         child: const Icon(
-          Icons.add,
+          Icons.medical_information,
           color: Colors.white,
           size: 30,
         ),
@@ -275,27 +320,56 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  groupList() {
+  Widget groupList() {
     return StreamBuilder(
       stream: groups,
       builder: (context, AsyncSnapshot snapshot) {
-        // make some checks
         if (snapshot.hasData) {
-          if (snapshot.data['groups'] != null) {
-            if (snapshot.data['groups'].length != 0) {
-              return ListView.builder(
-                itemCount: snapshot.data['groups'].length,
-                itemBuilder: (context, index) {
-                  int reverseIndex = snapshot.data['groups'].length - index - 1;
+          if (snapshot.data['groups'] != null &&
+              snapshot.data['groups'].length != 0) {
+            // Increase itemCount to account for the additional text entries
+            int itemCount = snapshot.data['groups'].length *
+                2; // Each group will now have a text entry before it
+            return ListView.builder(
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                // Check if the current index is for a text entry or for a group
+                if (index % 2 == 0) {
+                  // Text entries at even indexes
+                  // Decide which text to display
+                  if (index / 2 == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        "Write your personal logs here",
+                        style: TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey),
+                      ),
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        "Have a problem? Talk to your Doctor",
+                        style: TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueGrey),
+                      ),
+                    );
+                  }
+                } else {
+                  // Group entries at odd indexes
+                  int groupIndex = (index - 1) ~/ 2;
                   return GroupTile(
-                      groupId: getId(snapshot.data['groups'][reverseIndex]),
-                      groupName: getName(snapshot.data['groups'][reverseIndex]),
+                      groupId: getId(snapshot.data['groups'][groupIndex]),
+                      groupName: getName(snapshot.data['groups'][groupIndex]),
                       userName: snapshot.data['fullName']);
-                },
-              );
-            } else {
-              return noGroupWidget();
-            }
+                }
+              },
+            );
           } else {
             return noGroupWidget();
           }
@@ -330,7 +404,7 @@ class _HomePageState extends State<HomePage> {
             height: 20,
           ),
           const Text(
-            "this is the home page, people will have dashboard here",
+            "Loading",
             textAlign: TextAlign.center,
           )
         ],

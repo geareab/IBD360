@@ -4,6 +4,7 @@ import 'package:fyp_app/widgets/message_tile.dart';
 import 'package:fyp_app/widgets/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fyp_app/shared/constants.dart';
 
 class ChatPage extends StatefulWidget {
   final String groupId;
@@ -51,7 +52,7 @@ class _ChatPageState extends State<ChatPage> {
         centerTitle: true,
         elevation: 0,
         title: Text(widget.groupName),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Constants.primaryColorr,
         actions: [
           IconButton(
               onPressed: () {

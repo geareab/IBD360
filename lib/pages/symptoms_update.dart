@@ -1,22 +1,22 @@
 import 'package:fyp_app/pages/auth/login_page.dart';
 import 'package:fyp_app/pages/home_page.dart';
-import 'package:fyp_app/pages/symptoms_update.dart';
+import 'package:fyp_app/pages/profile_page.dart';
 import 'package:fyp_app/service/auth_service.dart';
 import 'package:fyp_app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp_app/shared/constants.dart';
 
-class ProfilePage extends StatefulWidget {
+class SymptomsPage extends StatefulWidget {
   String userName;
   String email;
-  ProfilePage({Key? key, required this.email, required this.userName})
+  SymptomsPage({Key? key, required this.email, required this.userName})
       : super(key: key);
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<SymptomsPage> createState() => _SymptomsPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _SymptomsPageState extends State<SymptomsPage> {
   AuthService authService = AuthService();
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Constants.primaryColorr,
         elevation: 0,
         title: const Text(
-          "Profile",
+          "Symptoms",
           style: TextStyle(
               color: Colors.white, fontSize: 27, fontWeight: FontWeight.bold),
         ),
@@ -66,14 +66,9 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           ListTile(
-            onTap: () {
-              nextScreen(
-                  context,
-                  SymptomsPage(
-                    userName: widget.userName,
-                    email: widget.email,
-                  ));
-            },
+            onTap: () {},
+            selected: true,
+            selectedColor: Theme.of(context).primaryColor,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             leading: const Icon(Icons.medical_information),
@@ -83,9 +78,14 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           ListTile(
-            onTap: () {},
-            selected: true,
-            selectedColor: Theme.of(context).primaryColor,
+            onTap: () {
+              nextScreen(
+                  context,
+                  ProfilePage(
+                    userName: widget.userName,
+                    email: widget.email,
+                  ));
+            },
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             leading: const Icon(Icons.group),
@@ -145,13 +145,15 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(
-              Icons.account_circle,
-              size: 200,
-              color: Colors.grey[700],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Full Name", style: TextStyle(fontSize: 17)),
+                Text(widget.userName, style: const TextStyle(fontSize: 17)),
+              ],
             ),
-            const SizedBox(
-              height: 15,
+            const Divider(
+              height: 20,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

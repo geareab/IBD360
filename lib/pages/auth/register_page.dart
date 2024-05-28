@@ -2,9 +2,11 @@ import 'package:fyp_app/helper/helper_function.dart';
 import 'package:fyp_app/pages/auth/login_page.dart';
 import 'package:fyp_app/pages/home_page.dart';
 import 'package:fyp_app/service/auth_service.dart';
+import 'package:fyp_app/service/database_service.dart';
 import 'package:fyp_app/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -19,7 +21,31 @@ class _RegisterPageState extends State<RegisterPage> {
   String email = "";
   String password = "";
   String fullName = "";
+  String? selectedDoctor;
+  String? doctorUid;
+
+  List<String> doctors = [];
   AuthService authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDoctors();
+  }
+
+  fetchDoctors() async {
+    List<String> fetchedDoctors = await DatabaseService().getDoctorsNames();
+    setState(() {
+      doctors = fetchedDoctors;
+    });
+  }
+
+  fetchDoctorUid(String doctorName) async {
+    print("Fetching UID for doctor: $doctorName");
+    doctorUid = await DatabaseService().getUidByName(doctorName);
+    print("Doctor UID fetched: $doctorUid");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         const Text(
-                          "Healthify",
+                          "IBD 360",
                           style: TextStyle(
                               fontSize: 40, fontWeight: FontWeight.bold),
                         ),
@@ -82,14 +108,43 @@ class _RegisterPageState extends State<RegisterPage> {
                               email = val;
                             });
                           },
-
-                          // check tha validation
+                          // check the validation
                           validator: (val) {
                             return RegExp(
                                         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                                     .hasMatch(val!)
                                 ? null
                                 : "Please enter a valid email";
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        DropdownButtonFormField<String>(
+                          decoration: textInputDecoration.copyWith(
+                              labelText: "Assigned Doctor",
+                              prefixIcon: Icon(
+                                Icons.person,
+                                color: Theme.of(context).primaryColor,
+                              )),
+                          value: selectedDoctor,
+                          hint: const Text("Select a Doctor"),
+                          items: doctors.map((String doctor) {
+                            return DropdownMenuItem<String>(
+                              value: doctor,
+                              child: Text(doctor),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) async {
+                            await fetchDoctorUid(newValue!);
+                            setState(() {
+                              selectedDoctor = newValue;
+                            });
+                          },
+                          validator: (val) {
+                            if (val == null) {
+                              return "Please select a doctor";
+                            } else {
+                              return null;
+                            }
                           },
                         ),
                         const SizedBox(height: 15),
@@ -130,8 +185,12 @@ class _RegisterPageState extends State<RegisterPage> {
                               style:
                                   TextStyle(color: Colors.white, fontSize: 16),
                             ),
-                            onPressed: () {
-                              register();
+                            onPressed: () async {
+                              if (formKey.currentState!.validate()) {
+                                await register();
+                                await createGroup();
+                                await createDocGroup();
+                              }
                             },
                           ),
                         ),
@@ -174,6 +233,8 @@ class _RegisterPageState extends State<RegisterPage> {
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserEmailSF(email);
           await HelperFunctions.saveUserNameSF(fullName);
+          await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+              .updateUserData(fullName, email, selectedDoctor);
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackbar(context, Colors.red, value);
@@ -182,6 +243,38 @@ class _RegisterPageState extends State<RegisterPage> {
           });
         }
       });
+    }
+  }
+
+  createGroup() async {
+    setState(() {
+      _isLoading = true;
+    });
+    DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+        .createGroup(
+            fullName, FirebaseAuth.instance.currentUser!.uid, "Personal Logs")
+        .whenComplete(() {
+      _isLoading = false;
+    });
+  }
+
+  createDocGroup() async {
+    if (doctorUid != null) {
+      print("Creating DocGroup...");
+      setState(() {
+        _isLoading = true;
+      });
+      await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+          .createDocGroup(fullName, FirebaseAuth.instance.currentUser!.uid,
+              selectedDoctor!, doctorUid!, selectedDoctor!)
+          .whenComplete(() {
+        setState(() {
+          _isLoading = false;
+        });
+        print("DocGroup created successfully");
+      });
+    } else {
+      print("Doctor UID is null. Cannot create DocGroup.");
     }
   }
 }
