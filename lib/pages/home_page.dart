@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             leading: const Icon(Icons.medical_information),
             title: const Text(
-              "Symptoms",
+              "Medical Info",
               style: TextStyle(color: Colors.black),
             ),
           ),
@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             leading: const Icon(Icons.group),
             title: const Text(
-              "Profile",
+              "Edit Profile",
               style: TextStyle(color: Colors.black),
             ),
           ),
