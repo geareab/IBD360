@@ -1,4 +1,4 @@
-# IBD_360
+# IBD 360
 
 
 This project presents the process for developing a mobile application to enhance the management of Inflammatory Bowel Disease (IBD). Given the chronic nature of IBD, traditional management methods often lead to fragmented communication, inconsistent symptom tracking, and poor adherence to treatment plans, resulting in suboptimal patient outcomes and increased healthcare costs. 
