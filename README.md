@@ -1,4 +1,4 @@
-# fyp_app
+# IBD_360
 
 A new Flutter project.
 
